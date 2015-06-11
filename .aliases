@@ -1,0 +1,310 @@
+alias sag="sudo apt-get" # shortcut for apt-get
+alias sagi="sudo apt-get install" # install binaries
+alias sagud="sudo apt-get update" # update binaries
+alias sagug="sudo apt-get upgrade" # install updated binaries
+alias sagr="sudo apt-get remove" # remove binary
+
+alias please="sudo fc -nl -1" # repeat last command as super-user
+alias needit='sudo $(history -p \!\!)' # repeat last command as super-user
+
+alias sudo="sudo " # trailing space causes next command to be checked for alias expansion as well
+alias cp="cp -i"
+#alias rm="rm -vI"
+alias rm="rm -vi"
+alias mv="mv -i"
+alias du="du -hs"
+alias df="df -h"
+alias strings="strings -a" # inhibits use of libbfd, see http://www.reddit.com/r/netsec/comments/2kazw2/dont_run_strings_on_untrusted_files/
+alias clip="xclip -f" # copy text to clipboard but still output it
+alias pst="xclip -o" # pastes contents of clipboard
+alias clr="sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g'" # clear ansi escape sequences
+alias res="sudo shutdown -r now"
+alias sus="sudo pm-suspend"
+alias clr="clear"
+alias cls="clear; ls"
+alias rn="rename"
+alias ercho=">&2 echo"
+
+PS_ARGS="pid,uid,comm,start,etime,%cpu,%mem"
+alias ps="ps -o $PS_ARGS"
+alias psa="\ps -eo $PS_ARGS"
+
+alias ocaml="rlwrap ocaml"
+alias py="python3"
+alias ipy="ipython qtconsole --pylab=inline 2>/dev/null >/dev/null &"
+alias sqlite="sqlite3"
+
+alias bc="bc -q -l"
+alias pgrep="pgrep -l"
+alias hex="hexdump -C"
+
+alias todo="vim ./TODO"
+alias td="vim ~/TODO"
+
+alias pause=read # wait for the user to press enter
+ch () {
+	google-chrome "$@" >/dev/null 2>&1 &
+}
+ich () {  
+	google-chrome --incognito "$@" 2>/dev/null &
+}
+ff () {
+	firefox "$@" >/dev/null 2>&1 &
+}
+iff () {
+	firefox --private "$@" >/dev/null 2>&1 &
+}
+
+alias opn="gnome-open >/dev/null 2>&1"
+
+alias json="python -m json.tool"
+
+alias pipes="pipes -p 6 -r 0 -R; reset"
+alias cmatrix="cmatrix -bs"
+
+tm() {
+	if [ $# -eq 0 ]; then
+		tmux attach
+	else
+		tmux attach -t $1
+	fi
+}
+
+# srcreenshots and alerts and makes a sound when done
+scrot () {
+	command scrot "$@";
+	alert "Screenshot taked";
+	suc;
+}
+
+# searches for a string in all source code in the current directory tree
+sgrep () {
+	grep -RIin --include='*.c' --include='*.h' --include='*.py' --include='*.java' --include='*.rb' --include='*.asm' --include='*.cpp' --include='*.hpp' --include='*.pl' --include='*.sh' --include='*.hs' --include='*.ml' --include='*.mli' --exclude-dir="_*" "$@" .
+}
+
+# highlights instances of search term by grepping for it or start of line
+hl () {
+	grep -E "^|$1" ${@:2}
+}
+
+fz () {
+	find . -iname "*$1*"
+}
+
+gr () {
+	grep -RiI "$1" .
+}
+
+cnt () {
+	find "$1" -type f | wc -l
+}
+
+# `repeat n cmd cmd-args` repeats a command n times
+repeat () {
+	for i in $(eval echo {1..$1}); do
+		${@:2};
+	done;
+}
+
+# move an item to the trash
+trash () {
+	mv "$@" ~/etc/trash
+}
+
+seeall () {
+	for file in "$@"; do
+		clear
+		echo $file:
+		echo -------------------------
+		echo
+		cat $file
+		pause
+	done
+}
+
+# view IP address(es)
+ipaddr () {
+	ifconfig | grep inet\ addr | awk -F: '{ print $2 }' | awk '{ print $1 }';
+	curl ifconfig.me
+}
+
+batlife () {
+	upower -i $(upower -e | tail -1) | grep percentage | sed 's/[^0-9]//g';
+	# cat /sys/class/power_supply/BAT0/capacity
+}
+
+#$@ so we can do 'hdr 3 printf', for example
+hdr () {
+	man "$@" | grep \#include | sed 's/^\s*//'
+}
+
+# DIRECTORY CONTROLS ###########################################################
+
+# sources directory specific run commands (in .cdrc) on cd to that directory
+cd () { 
+	if [ $# -eq 0 ]; then
+		dir=~
+	else
+		dir="$1"
+	fi
+
+	builtin cd "$dir"; 
+	local exit_code=$?;
+	[ -f .cdrc ] && source ./.cdrc 2>/dev/null;
+	return $exit_code
+}
+
+alias ..="cd .." # go up a directory
+alias ...="cd ../.." # go up 2 directories
+alias ....="cd ../../.." # go up 3 directories
+alias back="cd -" # go to last directory
+
+# make directory and change to it
+mkc () {
+	mkdir "$@" && cd "$1";
+}
+
+# CONFIG FILES #################################################################
+
+alias als="vim ~/.aliases && source ~/.aliases" # edit list of aliases
+alias bashrc="vim ~/.bashrc && source ~/.bashrc" # edit .bashrc
+alias cdrc="vim .cdrc && source .cdrc"
+alias vimrc="vim ~/.vimrc" # edit vim configs
+alias gvimrc="vim ~/.gvimrc" # edit gvim configs
+
+# NOISES #######################################################################
+
+alias ns="paplay" # play a noise
+alias suc="ns /usr/share/sounds/freedesktop/stereo/complete.oga" # success noise
+alias pop="ns /usr/share/sounds/freedesktop/stereo/message.oga" # pop noise
+alias fail="ns /usr/share/sounds/ubuntu/stereo/system-ready.ogg" # failure noise
+
+# GAMES? ####
+
+alias mc="java -jar ~/media/games/Minecraft.jar"
+
+
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+	test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+	alias ls='ls --color=auto'
+	#alias dir='dir --color=auto'
+	#alias vdir='vdir --color=auto'
+
+	alias grep='grep --color=auto'
+	alias fgrep='fgrep --color=auto'
+	alias egrep='egrep --color=auto'
+fi
+
+# some more ls aliases
+alias ll='ls -alF'
+alias la='ls -A'
+
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+# says something, use 'say -es Queso and other stuff'
+say()
+{
+	if [[ "${1}" =~ -[a-z]{2} ]]; then
+		local lang=${1#-}
+		local text="${*#$1}"
+	else
+		local lang=${LANG%_*}
+		local text="$*"
+	fi
+	mplayer "http://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&q=${text}" &> /dev/null
+}
+
+alias speedtest='wget -O /dev/null http://speedtest.wdc01.softlayer.com/downloads/test100.zip'
+
+alias randgraph='while true; do echo $RANDOM; sleep 0.7; done | stag'
+
+# argprint
+ap () {
+	n=1
+	while [ $# -gt 0 ]; do
+		echo $n: "$1"
+		shift 1
+		n=$((n+1))
+	done
+}
+
+t () {
+	[ "$@" ] && echo YES || echo NO
+}
+
+tn () {
+	[ "$@" ] && suc || fail
+}
+
+alias up="tmux send -t music.0 fg ENTER" # unpause
+alias pa="tmux send -t music.0 C-Z" # pause
+
+# print current song from cmus
+csng () {
+	cmusstatus=$(cmus-remote -Q)
+	artist=$(echo -e "$cmusstatus" | grep "tag artist" | cut -d' ' -f3-)
+	title=$(echo -e "$cmusstatus" | grep "tag title" | cut -d' ' -f3-)
+	album=$(echo -e "$cmusstatus" | grep "tag album" | cut -d' ' -f3-)
+	tracknumber=$(echo -e "$cmusstatus" | grep "tag tracknumber" | cut -d' ' -f3-)
+	echo $artist \| $title \| $album \| $tracknumber 
+}
+
+# cut files to 'clipboard', aka a directory holding them
+cuf () {
+	if [ $# -eq 0 ]; then
+		echo "Usage: cuf [files]"
+		return 1
+	fi
+
+	# remove previous files from clipboard, if any
+	if [ -d ~/.clip-files ]; then
+		\rm -rf ~/.clip-files
+	fi
+	# recreate clipboard
+	mkdir ~/.clip-files
+
+	for f in $*; do
+		mv "$f" ~/.clip-files
+	done
+}
+
+# copy files to 'clipboard', aka a directory holding them
+cof () {
+	if [ $# -eq 0 ]; then
+		echo "Usage: caf [files]"
+		return 1
+	fi
+
+	# remove previous files from clipboard, if any
+	if [ -d ~/.clip-files ]; then
+		\rm -rf ~/.clip-files
+	fi
+	# recreate clipboard
+	mkdir ~/.clip-files
+
+	for f in $*; do
+		cp "$f" ~/.clip-files
+	done
+}
+
+# paste files from clipboard into given directory, or current if none given
+paf () {
+	if [ ! -d ~/.clip-files ]; then
+		echo "Error: ~/.clipfiles: no such directory"
+		return 1
+	fi
+	
+	if [ $# -eq 0 ]; then
+		pastedir=.
+	elif [ $# -eq 1 ]; then
+		pastedir=$1
+	else
+		echo "Usage: paf [directory]"
+		return 2
+	fi
+
+	cp -r ~/.clip-files/* "$pastedir"
+}
