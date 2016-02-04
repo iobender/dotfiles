@@ -15,8 +15,8 @@ alias mv="mv -i"
 alias du="du -hs"
 alias df="df -h"
 alias strings="strings -a" # inhibits use of libbfd, see http://www.reddit.com/r/netsec/comments/2kazw2/dont_run_strings_on_untrusted_files/
-alias clip="xclip -f" # copy text to clipboard but still output it
-alias pst="xclip -o" # pastes contents of clipboard
+alias clip="xclip -selection c" # copy text to clipboard. To also output it, add -f
+alias pst="(xclip -o && echo)" # pastes contents of clipboard
 alias clr="sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g'" # clear ansi escape sequences
 alias res="sudo shutdown -r now"
 alias sus="sudo pm-suspend"
@@ -36,10 +36,13 @@ alias sqlite="sqlite3"
 
 alias bc="bc -q -l"
 alias pgrep="pgrep -l"
+alias igrep="grep -i"
 alias hex="hexdump -C"
 
 alias todo="vim ./TODO"
 alias td="vim ~/TODO"
+
+alias gpg="gpg --no-use-agent"
 
 alias pause=read # wait for the user to press enter
 ch () {
@@ -56,6 +59,8 @@ iff () {
 }
 
 alias opn="gnome-open >/dev/null 2>&1"
+alias shutter="shutter >/dev/null 2>&1 &"
+alias rstudio="rstudio >/dev/null 2>&1 &"
 
 alias json="python -m json.tool"
 
@@ -72,7 +77,7 @@ tm() {
 
 # srcreenshots and alerts and makes a sound when done
 scrot () {
-	command scrot "$@";
+	command scrot $@;
 	alert "Screenshot taked";
 	suc;
 }
@@ -160,9 +165,47 @@ alias ....="cd ../../.." # go up 3 directories
 alias back="cd -" # go to last directory
 
 # make directory and change to it
-mkc () {
+mkcd () {
 	mkdir "$@" && cd "$1";
 }
+
+alias dls="cd ~/dls"
+alias docs="cd ~/docs"
+alias plg="cd ~/playground"
+
+alias pkp="cd ~/docs/pkp"
+alias umd="cd ~/docs/umd"
+
+alias frfa="cd ~/docs/umd/frfa"
+alias frsp="cd ~/docs/umd/frsp"
+alias sofa="cd ~/docs/umd/sofa"
+alias sosp="cd ~/docs/umd/sosp"
+alias jufa="cd ~/docs/umd/jufa"
+alias jusp="cd ~/docs/umd/jusp"
+alias sefa="cd ~/docs/umd/sefa"
+alias sesp="cd ~/docs/umd/sesp"
+
+alias 393="jufa; cd engl393"
+alias 396="jufa; cd cmsc396"
+alias 406="jufa; cd math406"
+alias 412="jufa; cd cmsc412"
+alias geekos="jufa; cd cmsc412/geekos-project"
+alias 456="jufa; cd cmsc456"
+alias 219="jusp; cd honr219T"
+alias 403="jusp; cd math403"
+alias 421="jusp; cd cmsc421"
+alias 430="jusp; cd cmsc430"
+alias 445="sefa; cd math445"
+alias 451="sefa; cd cmsc451"
+alias 631="sefa; cd cmsc631"
+alias 400="sefa; cd stat400"
+alias 376="sefa; cd edsp376"
+alias cli="sefa; cd cmscCLI"
+alias 377="sesp; cd hlth377"
+alias 238="sesp; cd honr238v"
+alias 320="sesp; cd cmsc320"
+alias 414="sesp; cd cmsc414"
+alias 157="sesp; cd knes157n"
 
 # CONFIG FILES #################################################################
 
@@ -171,6 +214,7 @@ alias bashrc="vim ~/.bashrc && source ~/.bashrc" # edit .bashrc
 alias cdrc="vim .cdrc && source .cdrc"
 alias vimrc="vim ~/.vimrc" # edit vim configs
 alias gvimrc="vim ~/.gvimrc" # edit gvim configs
+alias f5="source ~/.bashrc; source ~/.aliases; [ -f .cdrc ] && source .cdrc"
 
 # NOISES #######################################################################
 
@@ -199,6 +243,8 @@ fi
 # some more ls aliases
 alias ll='ls -alF'
 alias la='ls -A'
+
+alias accts="vim ~/docs/info/accounts.txt"
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
@@ -266,7 +312,7 @@ cuf () {
 	# recreate clipboard
 	mkdir ~/.clip-files
 
-	for f in $*; do
+	for f in "$@"; do
 		mv "$f" ~/.clip-files
 	done
 }
@@ -285,7 +331,7 @@ cof () {
 	# recreate clipboard
 	mkdir ~/.clip-files
 
-	for f in $*; do
+	for f in "$@"; do
 		cp "$f" ~/.clip-files
 	done
 }
@@ -307,4 +353,101 @@ paf () {
 	fi
 
 	cp -r ~/.clip-files/* "$pastedir"
+}
+
+
+function pydo {
+    if [ $# -le 0 ]; then
+        echo "Usage: pydo \"command\""
+        return 1
+    fi
+    python -c "exec(\"import os, random, sys\\nfor (n, line) in enumerate(map(lambda l: l.strip(), sys.stdin)):\\n\\tprint $@\")"
+}
+
+# opens pages in your browser
+function inet {
+    if [ "$1" = --help -o "$1" = -h ]; then
+        echo "Usage: $FUNCNAME <site> <target>"
+        echo $FUNCNAME google stuff - searches Google for "stuff"
+        echo $FUNCNAME wp stuff - searches Wikipedia for "stuff"
+        echo $FUNCNAME yt stuff - searches YouTube for "stuff"
+        echo $FUNCNAME ytc channel - opens YouTube channel "channel"
+        echo $FUNCNAME reddit stuff - searched Reddit for stuff
+        echo $FUNCNAME r subreddit - opens subreddit "subreddit"
+        echo $FUNCNAME az product - searches Amazon for "product"
+        echo $FUNCNAME dict word - searches Google for "define word"
+        echo $FUNCNAME ud word - searches UrbanDictionary for "word"
+        return
+    fi
+
+    browser=google-chrome
+    if [ $# -lt 2 ]; then
+        echo "Usage: $FUNCNAME <site> <target>"
+        return
+    fi
+    site="$1"
+    shift
+    target=$(echo "$@" | sed s/\ /+/g)
+
+    case "$site" in 
+    google)
+        url="https://www.google.com/#q=$target" ;;
+    wp)
+        url="http://en.wikipedia.org/w/index.php?title=Special:Search&search=$target" ;;
+    yt)
+        url="http://www.youtube.com/results?search_query=$target&page={startPage?}&utm_source=opensearch" ;;
+    ytc) 
+        url="https://www.youtube.com/user/$target" ;;
+    reddit) 
+        url="http://www.reddit.com/search?q=$target&sort=relevance&t=all" ;;
+    r) 
+        url="https://www.reddit.com/r/$target" ;;
+    az) 
+        url="http://www.amazon.com/s/ref=nb_sb_noss_1?url=search-alias%3Daps&field-keywords=$target" ;;
+    dict) 
+        url="https://www.google.com/#q=define+$target" ;;
+    ud) 
+        url="http://www.urbandictionary.com/define.php?term=$target" ;;
+    *)
+        echo "site $site not recognized"
+        return 
+        ;;
+    esac
+
+    $browser $url >/dev/null 2>&1 &
+}
+
+# directories we want to cd to from anywhere
+declare -A CDAMAP
+CDAMAP[dls]=~/dls
+CDAMAP[docs]=~/docs
+CDAMAP[plg]=~/playground
+CDAMAP[umd]=~/docs/umd
+CDAMAP[pkp]=~/docs/pkp
+CDAMAP[frfa]=~/docs/umd/frfa
+CDAMAP[frsp]=~/docs/umd/frsp
+CDAMAP[sofa]=~/docs/umd/sofa
+CDAMAP[sosp]=~/docs/umd/sosp
+CDAMAP[jufa]=~/docs/umd/jufa
+CDAMAP[jusp]=~/docs/umd/jusp
+CDMAP[sefa]=~/docs/umd/sefa
+CDMAP[sesp]=~/docs/umd/sesp
+CDMAP[377]=~/docs/umd/sesp/hlth377
+CDMAP[238]=~/docs/umd/sesp/honr238v
+CDMAP[320]=~/docs/umd/sesp/cmsc320
+CDMAP[414]=~/docs/umd/sesp/cmsc414
+CDMAP[157]=~/docs/umd/sesp/knes157n
+# cd's to any directory defined in CDAMAP
+function cda {
+    if [ $# -ne 1 ]; then
+        echo "Usage: $FUNCNAME <dir>"
+        return
+    fi
+    dirname="$1"
+    fulldir=${CDMAP[$dirname]}
+    if [ -z "$fulldir" ]; then
+        echo "No directory path found for $dirname"
+        return
+    fi
+    cd "$fulldir"
 }
