@@ -1,3 +1,7 @@
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# for examples
+
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
@@ -102,6 +106,8 @@ if ! shopt -oq posix; then
 fi
 
 export EDITOR=/usr/bin/vim
+export PLAYGROUND=~/playground
+export LOGS=~/logs
 
 export GROFF_NO_SGR=1
 man() {
@@ -115,11 +121,11 @@ man() {
     man "$@"
 }
 
+export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 export PATH="$PATH:."
 
 tabs -4 # set tabs to be 4 space instead of 8
 
-export PROMPT_COMMAND=_prompt_command
 _prompt_command () {
 	local EXIT="$?"
 	PS1=""
@@ -135,5 +141,10 @@ _prompt_command () {
 
 	PS1+="$ \[\033[0m\]"
 }
+export PROMPT_COMMAND=_prompt_command
 
-export TERM=xterm-256color
+#export TERM=xterm-256color
+#this messes up cmus, don't add it
+
+#uncomment to have tab-complete cycle through options
+#bind '"\t":menu-complete'
