@@ -1,5 +1,5 @@
 set number					" show line numbers
-set relativenumber			" show line numbers relative to current line
+" set relativenumber			" show line numbers relative to current line
 set hlsearch				" hightlight search matches
 set cindent					" indent C-style
 set autoindent				" keep indentation of previous line if no indentation from filetype
@@ -7,6 +7,7 @@ set ignorecase				" ignore case when searching
 set tabstop=4				" 4 spaces per tab
 set softtabstop=4			" 4 spaces per tab backspace
 set shiftwidth=4			" 4 spaces for indent
+set expandtab               " expand tabs to spaces
 set showcmd					" show command as it's entered
 set scrolloff=5				" always have at least 5 lines visible above/below the cursor
 set formatoptions=croq		" auto-wrap comments, auto-insert comment leader after <Enter>, o, or O, allow formatting with gq
@@ -17,6 +18,10 @@ set clipboard=unnamedplus	" copy/paste using system's
 set matchpairs+=<:>			" match <> like (), etc.
 
 let mapleader=" "			" makes Space bar leader
+
+nnoremap <Leader>s :w \| make show<CR>
+
+inoremap jk <Esc>           " jk to exit insert mode
 
 " remove highlights from search and displayed message
 nnoremap <Leader><Leader> :silent noh<Bar>echo<CR>
@@ -186,6 +191,52 @@ nnoremap <C-h> <C-W>h
 nnoremap <C-j> <C-W>j
 nnoremap <C-k> <C-W>k
 nnoremap <C-l> <C-W>l
+
+" for Vundle
+set nocompatible
+filetype off
+
+" set the runtime path to include Vundle and initialize
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+" alternatively, pass a path where Vundle should install plugins
+"call vundle#begin('~/some/path/here')
+
+" let Vundle manage Vundle, required
+Plugin 'gmarik/Vundle.vim'
+
+" The following are examples of different formats supported.
+" Keep Plugin commands between vundle#begin/end.
+" plugin on GitHub repo
+" Plugin 'tpope/vim-fugitive'
+" plugin from http://vim-scripts.org/vim/scripts.html
+" Plugin 'L9'
+" Git plugin not hosted on GitHub
+" Plugin 'git://git.wincent.com/command-t.git'
+" git repos on your local machine (i.e. when working on your own plugin)
+" Plugin 'file:///home/gmarik/path/to/plugin'
+" The sparkup vim script is in a subdirectory of this repo called vim.
+" Pass the path to set the runtimepath properly.
+" Plugin 'rstacruz/sparkup', {'rtp': 'vim/'}
+" Avoid a name conflict with L9
+" Plugin 'user/L9', {'name': 'newL9'}
+
+Plugin 'Valloric/YouCompleteMe'
+
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+filetype plugin indent on    " required
+" To ignore plugin indent changes, instead use:
+"filetype plugin on
+"
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+"
+" see :h vundle for more details or wiki for FAQ
+" Put your non-Plugin stuff after this line
 
 " Colors
 highlight PreProc term=underline ctermfg=6 guifg=DarkCyan
